@@ -34,7 +34,7 @@ namespace Pong
         SoundPlayer collisionSound = new SoundPlayer(Properties.Resources.collision);
 
         //determines whether a key is being pressed or not
-        Boolean aKeyDown, zKeyDown, jKeyDown, mKeyDown;
+        Boolean wKeyDown, sKeyDown, aKeyDown, dKeyDown, upKeyDown, downKeyDown, leftKeyDown, rightKeyDown;
 
         // check to see if a new game can be started
         Boolean newGameOk = true;
@@ -42,11 +42,11 @@ namespace Pong
         //ball directions, speed, and rectangle
         Boolean ballMoveRight = true;
         Boolean ballMoveDown = true;
-        const int BALL_SPEED = 4;
+        const int BALL_SPEED = 3;
         Rectangle ball;
 
         //paddle speeds and rectangles
-        const int PADDLE_SPEED = 4;
+        const int PADDLE_SPEED = 3;
         Rectangle p1, p2;
 
         //player and game scores
@@ -67,17 +67,29 @@ namespace Pong
             //check to see if a key is pressed and set is KeyDown value to true if it has
             switch (e.KeyCode)
             {
+                case Keys.W:
+                    wKeyDown = true;
+                    break;
+                case Keys.S:
+                    sKeyDown = true;
+                    break;
                 case Keys.A:
                     aKeyDown = true;
                     break;
-                case Keys.Z:
-                    zKeyDown = true;
+                case Keys.D:
+                    dKeyDown = true;
                     break;
-                case Keys.J:
-                    jKeyDown = true;
+                case Keys.Up:
+                    upKeyDown = true;
                     break;
-                case Keys.M:
-                    mKeyDown = true;
+                case Keys.Down:
+                    downKeyDown = true;
+                    break;
+                case Keys.Left:
+                    leftKeyDown = true;
+                    break;
+                case Keys.Right:
+                    rightKeyDown = true;
                     break;
                 case Keys.Y:
                 case Keys.Space:
@@ -94,24 +106,36 @@ namespace Pong
                     break;
             }
         }
-        
+
         // -- YOU DO NOT NEED TO MAKE CHANGES TO THIS METHOD
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
             //check to see if a key has been released and set its KeyDown value to false if it has
             switch (e.KeyCode)
             {
+                case Keys.W:
+                    wKeyDown = false;
+                    break;
+                case Keys.S:
+                    sKeyDown = false;
+                    break;
                 case Keys.A:
                     aKeyDown = false;
                     break;
-                case Keys.Z:
-                    zKeyDown = false;
+                case Keys.D:
+                    dKeyDown = false;
                     break;
-                case Keys.J:
-                    jKeyDown = false;
+                case Keys.Up:
+                    upKeyDown = false;
                     break;
-                case Keys.M:
-                    mKeyDown = false;
+                case Keys.Down:
+                    downKeyDown = false;
+                    break;
+                case Keys.Left:
+                    leftKeyDown = false;
+                    break;
+                case Keys.Right:
+                    rightKeyDown = false;
                     break;
             }
         }
@@ -181,25 +205,25 @@ namespace Pong
 
             #region update paddle positions
 
-            if (aKeyDown == true && p1.Y > 0)
+            if (wKeyDown == true && p1.Y > 0)
             {
                 // TODO create code to move player 1 paddle up using p1.Y and PADDLE_SPEED
                 p1.Y = p1.Y - PADDLE_SPEED;
             }
 
             // TODO create an if statement and code to move player 1 paddle down using p1.Y and PADDLE_SPEED
-            if (zKeyDown == true && p1.Y < this.Height - p1.Height)
+            if (sKeyDown == true && p1.Y < this.Height - p1.Height)
             {
                 p1.Y = p1.Y + PADDLE_SPEED;
             }
 
             // TODO create an if statement and code to move player 2 paddle up using p2.Y and PADDLE_SPEED
-            if (jKeyDown == true && p2.Y > 0)
+            if (upKeyDown == true && p2.Y > 0)
             {
                 p2.Y = p2.Y - PADDLE_SPEED;
             }
             // TODO create an if statement and code to move player 2 paddle down using p2.Y and PADDLE_SPEED
-            if (mKeyDown == true && p2.Y < this.Height - p2.Height)
+            if (downKeyDown == true && p2.Y < this.Height - p2.Height)
             {
                 p2.Y = p2.Y + PADDLE_SPEED;
             }
@@ -212,13 +236,14 @@ namespace Pong
                 // TODO use ballMoveDown boolean to change direction
                 ballMoveDown = true;
                 // TODO play a collision sound
-
+                collisionSound.Play();
             }
             // TODO In an else if statement use ball.Y, this.Height, and ball.Width to check for collision with bottom line
             // If true use ballMoveDown down boolean to change direction
             else if (ball.Y >= this.Height - ball.Height)
             {
                 ballMoveDown = false;
+                collisionSound.Play();
             }
 
             #endregion
@@ -253,20 +278,45 @@ namespace Pong
                 // TODO
                 // --- play score sound
                 // --- update player 2 score
+                scoreSound.Play();
+                player2Score++;
 
                 // TODO use if statement to check to see if player 2 has won the game. If true run 
                 // GameOver method. Else change direction of ball and call SetParameters method.
-
+                if (player2Score == 3)
+                {
+                    GameOver("Player 2");
+                }
+                else
+                {
+                    ballMoveRight = !ballMoveRight;
+                    SetParameters();
+                }
             }
 
             // TODO same as above but this time check for collision with the right wall
+            if (ball.X > this.Width - ball.Width)
+            {
+                scoreSound.Play();
+                player1Score++;
 
+                if (player1Score == 3)
+                {
+                    GameOver("Player 1");
+                }
+                else
+                {
+                    ballMoveRight = !ballMoveRight;
+
+                    SetParameters();
+                }
+            }
             #endregion
-            
+
             //refresh the screen, which causes the Form1_Paint method to run
             this.Refresh();
         }
-        
+
         /// <summary>
         /// Displays a message for the winner when the game is over and allows the user to either select
         /// to play again or end the program
@@ -278,9 +328,15 @@ namespace Pong
 
             // TODO create game over logic
             // --- stop the gameUpdateLoop
+            gameUpdateLoop.Stop();
             // --- show a message on the startLabel to indicate a winner, (need to Refresh).
+            startLabel.Visible = true;
+            startLabel.Text = (winner + "\nWins!");
             // --- pause for two seconds 
+            this.Refresh();
+            Thread.Sleep(2000);
             // --- use the startLabel to ask the user if they want to play again
+            startLabel.Text = "Rematch?";
 
         }
 
@@ -292,6 +348,8 @@ namespace Pong
             // TODO draw ball using FillRectangle
             e.Graphics.FillEllipse(drawBrush, ball);
             // TODO draw scores to the screen using DrawString
+            e.Graphics.DrawString(player1Score + "", drawFont, drawBrush, 40, 30);
+            e.Graphics.DrawString(player2Score + "", drawFont, drawBrush, this.Width - 40, 30);
         }
 
     }
